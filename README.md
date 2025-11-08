@@ -6,6 +6,10 @@
 - **Goal:** Predict whether a loan **defaults** (target: `Defaulted`) using tabular borrower/loan features.
 - **Approach** A sophisticated machine learning system for predicting loan defaults using **BorderlineSMOTE** oversampling, **Weight of Evidence** encoding, and **Random Forest** classification. The model achieves **91.2% Average Precision** and **97.4% ROC-AUC** on holdout data.
 
+
+![Results at a glance](https://github.com/S-D-Willis/loan-default-pred/blob/4b9c6a8f53de8feace824755c5e6a1723ad85d5a/model_summary.png)
+
+
 ### Key Metrics (Holdout Set - 89,717 samples)
 
 | Metric | Score | Business Impact |
