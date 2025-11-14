@@ -38,7 +38,7 @@
 - Visualization of train data
     - Bar charts
     - Violin plots
-    - Dnsity histograms
+    - Density histograms
 
 ### Loan-Default-Pred_3_EXPERIMENTS.ipynb
 - Weight of Evidence encoding
