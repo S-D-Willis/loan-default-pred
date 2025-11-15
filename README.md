@@ -28,7 +28,7 @@
 
 ## Repository structure
 
-> Notebooks (in order):
+> Notebooks:
 >`Intro → Cleaning → EDA → Experiments → Final Evaluation`
 
 - `Loan-Default-Pred_0_INTRO.ipynb` – **Project + data introduction**
