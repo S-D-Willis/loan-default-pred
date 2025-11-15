@@ -1,49 +1,67 @@
-# 🏦 Loan Default Prediction with Machine Learning
+# Loan Default Prediction with Machine Learning
 
-*A concise, end-to-end walkthrough of cleaning, exploring, modeling, and evaluating a binary loan-default predictor.*
+> End-to-end ML pipeline to predict small-business loan defaults on ~900k US SBA loans, from raw CSV → cleaning → EDA → model selection → holdout evaluation.
+---
 
-## TL;DR
-- **Goal:** Predict whether a loan **defaults** (target: `Defaulted`) using tabular borrower/loan features.
-- **Approach** A sophisticated machine learning system for predicting loan defaults using **BorderlineSMOTE** oversampling, **Weight of Evidence** encoding, and **Random Forest** classification. The model achieves **91.2% Average Precision** and **97.4% ROC-AUC** on holdout data.
+## Snapshot
+
+- **Goal:** Predict whether a loan defaults (`Defaulted` ∈ {0,1}) using borrower + loan attributes.
+- **Data:** ~897k historic US Small Business Administration (SBA) loans after cleaning.
+- **Best model:** Random Forest with
+  - **Weight of Evidence (WoE)** encoding for high-cardinality categorical features
+  - **BorderlineSMOTE** oversampling (sampling_strategy = 0.5, m_neighbors = 3)
+- **Holdout size:** 89,717 loans never seen during model development.
+
+**Results**
+
+| Metric                | Score  | Interpretation                                      |
+|-----------------------|--------|-----------------------------------------------------|
+| Average Precision     | 0.912  | Very strong ranking of true defaulters             |
+| ROC AUC               | 0.974  | Excellent separation between default / non-default |
+| Precision @ 0.5       | 0.861  | 86% of flagged loans actually default              |
+| Recall @ 0.5          | 0.846  | Catches ~85% of all defaults                       |
+| F1 Score              | 0.853  | Good balance of precision and recall               |
+| Accuracy              | 0.949  | 95% overall classification accuracy                |
+
+![Evaluation dashboard](evaluation_plots.png)
 
 
-![Results at a glance](https://github.com/S-D-Willis/loan-default-pred/blob/4b9c6a8f53de8feace824755c5e6a1723ad85d5a/model_summary.png)
+## Repository structure
 
+> Notebooks (in order):
+>`Intro → Cleaning → EDA → Experiments → Final Evaluation`
 
-### Key Metrics (Holdout Set - 89,717 samples)
+- `Loan-Default-Pred_0_INTRO.ipynb` – **Project + data introduction**
+  - Describes the SBA loan dataset and target (`Defaulted`).
 
-| Metric | Score | Business Impact |
-|--------|-------|-----------------|
-| **Average Precision** | 0.912 | Excellent ranking quality |
-| **ROC-AUC** | 0.974 | Outstanding discrimination ability |
-| **Precision @ 0.5** | 0.861 | 86% of flagged loans actually default |
-| **Recall @ 0.5** | 0.846 | Catches 85% of all defaults |
-| **F1 Score** | 0.853 | Strong balanced performance |
-| **Accuracy** | 0.949 | 95% overall accuracy |
+- `Loan-Default-Pred_1_CLEANING.ipynb` – **Data cleaning & export**
+  - Handles issues with data entry, dtypes, and leakage
+  - Splits the data into dev and holdout sets
 
+- `Loan-Default-Pred_2_EDA.ipynb` – **Exploratory data analysis**
+  - Target distribution and default rates across key features.
+  - Univariate + bivariate plots:
+    - Bar charts / violin plots for categorical vs `Defaulted`
+    - Histograms and boxplots for numeric features
+    - Correlation heatmap for numerical columns vs `Defaulted`
 
-## Notebooks at a Glance
+- `Loan-Default-Pred_3_EXPERIMENTS.ipynb` – **Modeling experiments**
+  - Defines a custom `WOEEncoder` and plugs it into a `ColumnTransformer`:
+    - Numeric: median imputation + `RobustScaler`
+    - Categorical: impute → WoE encode → fill residual NaNs.
+  - Builds imbalanced-learning pipelines with:
+    - `SMOTE`
+    - `BorderlineSMOTE` (BoSMOTE)
+    - `RandomUnderSampler` (RUS)
+  - Uses `StratifiedKFold` CV and Average Precision as the main model-selection metric.
+  - Compares oversampling strategies:
+    - Settles on the WoE + Random Forest + BorderlineSMOTE pipeline
 
-> The series is designed so each notebook can be read independently yet builds on the previous one. Outputs (cleaned data, fitted transformers, reports) are saved between steps.
-
-### Loan-Default-Pred_0_INTRO.py
-- Dataset overview and feature descriptions
-
-### Loan-Default-Pred_1_CLEAN.py
-- Type corrections
-- Leakage removal
-- Data entry issue control
-
-### Loan-Default-Pred_2_EDA.py
-- Visualization of train data
-    - Bar charts
-    - Violin plots
-    - Density histograms
-
-### Loan-Default-Pred_3_EXPERIMENTS.ipynb
-- Weight of Evidence encoding
-- Up/down sampling
-- Hyperparameter tuning
-
-### Loan-Default-Pred_4_EVAL.ipynb
-- Final model evaluation on holdout
+- `Loan-Default-Pred_4_EVAL.ipynb` – **Final model & holdout evaluation**
+  - Rebuilds the best pipeline with tuned parameters on dev set
+  - Evaluates one the holdout set and reports:
+    - AP, ROC AUC, Precision, Recall, F1, Accuracy
+    - Confusion matrix + classification report
+    - Feature importances (with cleaned feature names)
+    - ROC & PR curves vs naive baseline
+    - Learning curve (AP vs number of training samples)
